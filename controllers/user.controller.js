@@ -51,31 +51,31 @@ exports.signup = catchAsync(async (req, res) => {
 exports.login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
-  // Validate required fields
   if (!email || !password) {
     throw new AppError("Please provide email and password", 400);
   }
 
-  // Find user by email
   const user = await User.findOne({ email }).select("+password");
 
-  // Check if user exists
   if (!user) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // Check if password is correct
-  const isCorrect = await user.correctPassword(user.password, password);
+  // Correct order: (plainTextPassword, hashedPassword)
+  const isCorrect = await user.correctPassword(password, user.password);
+
   if (!isCorrect) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  // Remove password from output (security)
   user.password = undefined;
 
-  // Generate JWT token
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
-  // Return success response
+  const token = jwt.sign(
+    { id: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN }
+  );
+
   return res.status(200).json({
     status: "success",
     token,
@@ -84,6 +84,7 @@ exports.login = catchAsync(async (req, res) => {
     },
   });
 });
+
 
 exports.logout = catchAsync(async (req, res) => {
   // Clear JWT token
