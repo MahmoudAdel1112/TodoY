@@ -20,13 +20,12 @@ validateEnv();
 
 const app = express();
 
-// MongoDB connection with improved error handling
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected successfully!'))
   .catch((err) => {
     console.error('❌ MongoDB connection error:', err);
-    // Exit process if database connection fails
     process.exit(1);
   });
 
@@ -36,19 +35,12 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 
-// CORS configuration
-// In production, CORS_ORIGIN should be set to your frontend URL (comma-separated for multiple)
-// In development, defaults to allowing all origins
-const corsOrigin = process.env.CORS_ORIGIN || (process.env.NODE_ENV === 'production' ? undefined : '*');
-
-app.use(cors({
-  origin: corsOrigin ? (corsOrigin.includes(',') ? corsOrigin.split(',').map(o => o.trim()) : corsOrigin) : '*',
-  credentials: true,
-}));
+// Simple CORS — allows all origins (no dynamic logic)
+app.use(cors());
 
 // Body parser with size limits
-app.use(express.json({ limit: '10kb' })); // Limit JSON payload size
-app.use(express.urlencoded({ extended: true, limit: '10kb' })); // Limit URL-encoded payload size
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // Logging middleware (development only)
 if (process.env.NODE_ENV === 'development') {
@@ -57,8 +49,8 @@ if (process.env.NODE_ENV === 'development') {
 
 // General rate limiter
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
