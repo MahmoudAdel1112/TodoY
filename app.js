@@ -63,6 +63,10 @@ app.use('/api/v1', generalLimiter);
 app.use('/api/v1/todos', todoRouter);
 app.use('/api/v1/users', userRouter);
 
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
 // Handle undefined routes
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
