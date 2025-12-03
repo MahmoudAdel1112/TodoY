@@ -22,8 +22,8 @@ const todoSchema = new mongoose.Schema({
 });
 
 // Indexes for performance
-todoSchema.index({ userId: 1 }); // Index for filtering todos by user
-todoSchema.index({ userId: 1, createdAt: -1 }); // Compound index for user's todos sorted by date
+// todoSchema.index({ userId: 1 }); // Index for filtering todos by user
+// todoSchema.index({ userId: 1, createdAt: -1 }); // Compound index for user's todos sorted by date
 
 const Todo = mongoose.model("Todo", todoSchema);
 
