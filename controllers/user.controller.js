@@ -37,7 +37,9 @@ exports.signup = catchAsync(async (req, res) => {
   newUser.passwordConfirm = undefined;
 
   // Generate JWT token
-  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN });
+  const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
   // Return success response
   return res.status(201).json({
     status: "success",
@@ -70,11 +72,9 @@ exports.login = catchAsync(async (req, res) => {
 
   user.password = undefined;
 
-  const token = jwt.sign(
-    { id: user._id },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN }
-  );
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+  });
 
   return res.status(200).json({
     status: "success",
@@ -85,12 +85,27 @@ exports.login = catchAsync(async (req, res) => {
   });
 });
 
-
 exports.logout = catchAsync(async (req, res) => {
   // Clear JWT token
   res.clearCookie("jwt");
   // Return success response
   return res.status(200).json({
     status: "success",
+  });
+});
+
+exports.getMe = catchAsync(async (req, res) => {
+  // User is already attached to req.user by the protect middleware
+  const user = req.user;
+
+  // Remove password from output (security - though select: false already excludes it)
+  user.password = undefined;
+  user.passwordConfirm = undefined;
+
+  return res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
   });
 });
